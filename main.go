@@ -3,27 +3,29 @@ package main
 import (
 	"fmt"
 	"log"
-	"os"
 	"time"
 )
 
 var APIClient string
 
 func main() {
-	NewArmoireChecker(NewConfig(APIClient)).run()
+	NewArmoireChecker().run()
 
 	// todo: how do we want users to stop the application? watch for keypress? listen for signal?
 	// todo: what if the application is canceled(signaled)?
+	// todo: do a partial report on each check so that we are not collecting system memory endlessly
 }
 
-func NewArmoireChecker(config *Config) *ArmoireChecker {
+func NewArmoireChecker() *ArmoireChecker {
+	//config := NewConfig(APIClient)
 	return &ArmoireChecker{
-		Config:   config,
-		DropsMap: map[string][]Armoire{},
+		//Config:   config,
+		Requester: NewRequester(),
+		DropsMap:  map[string][]Armoire{},
 	}
 }
 func (this *ArmoireChecker) run() {
-	os.Exit(0)
+	//os.Exit(0)
 	fmt.Println("Checking your Enchanted Armoire")
 	defer this.report()
 
@@ -39,7 +41,7 @@ func (this *ArmoireChecker) run() {
 	}
 }
 func (this *ArmoireChecker) check() bool {
-	gold, err := getGoldAmount("user?userFields=stats.gp", this.Config)
+	gold, err := this.getGoldAmount()
 	if this.InitialGold <= 0 {
 		this.InitialGold = gold
 	}
@@ -52,7 +54,7 @@ func (this *ArmoireChecker) check() bool {
 		fmt.Println("No more gold, go earn some more :)")
 		return false
 	}
-	response := doArmoireRequest(this.Config)
+	response := this.checkArmoire()
 	if !responseIsFavorable(response) {
 		return false
 	}

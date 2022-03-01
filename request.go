@@ -8,87 +8,74 @@ import (
 	"path"
 )
 
-// todo: make one request method that both of these requests use instead
-
-func getGoldAmount(action string, config *Config) (float64, error) {
-	client := http.Client{}
-	request, err := http.NewRequest(http.MethodGet, BuildAddress("v3", action), nil)
-	if err != nil {
-		log.Println("[ERROR] http.NewRequest:", err)
-	}
-
-	request.Header.Set("Content-Type", "application/json")
-	request.Header.Set("x-api-user", config.UserID)
-	request.Header.Set("x-api-key", config.UserToken)
-	request.Header.Set("x-client", config.APIClient)
-
-	response, err := client.Do(request)
-	if err != nil {
-		log.Println("[ERROR] client.Do:", err)
-		return 0, err
-	}
-	if response.StatusCode != http.StatusOK {
-		log.Println("got a bad response:", response.StatusCode, response.Status)
-		return 0, err
-	}
-	responseBytes, err := ioutil.ReadAll(response.Body)
-	if err != nil {
-		log.Println("[ERROR] ioutil.ReadAll:", err)
-		return 0, err
-	}
-
-	var user User
-	err = json.Unmarshal(responseBytes, &user)
-	if err != nil {
-		log.Println("[ERROR] json.Unmarshal:", err)
-		return 0, err
-	}
-
-	return user.Data.Stats.Gold, nil
+type Requester struct {
+	config *Config
+	User   User
 }
 
-func doArmoireRequest(config *Config) User {
+func NewRequester() *Requester {
+	return &Requester{
+		config: NewConfig(APIClient),
+	}
+}
+
+func (this *Requester) getGoldAmount() (float64, error) {
+	err := this.doTheRequest(http.MethodGet, "user?userFields=stats.gp")
+	if false { // todo
+		return 0, err
+	}
+
+	return this.User.Data.Stats.Gold, nil
+}
+func (this *Requester) checkArmoire() User {
 	//https://habitica.com/api/v3/user/buy-armoire
+	err := this.doTheRequest(http.MethodPost, "user/buy-armoire")
+	if err != nil {
+		return User{} // todo
+	}
+
+	return this.User
+}
+
+func (this *Requester) doTheRequest(method, action string) error {
 	client := http.Client{}
-	request, err := http.NewRequest(http.MethodPost, BuildAddress("v3", "user/buy-armoire"), nil)
+	request, err := http.NewRequest(method, BuildAddress(ApiVersion, action), nil)
 	if err != nil {
 		log.Println("[ERROR] http.NewRequest:", err)
 	}
 
 	request.Header.Set("Content-Type", "application/json")
-	request.Header.Set("x-api-user", config.UserID)
-	request.Header.Set("x-api-key", config.UserToken)
-	request.Header.Set("x-client", config.APIClient)
+	request.Header.Set("x-api-user", this.config.UserID)
+	request.Header.Set("x-api-key", this.config.UserToken)
+	request.Header.Set("x-client", this.config.APIClient)
 
 	response, err := client.Do(request)
 	if err != nil {
 		log.Println("[ERROR] client.Do:", err)
-		//return response, err
+		return err
 	}
 	if response.StatusCode != http.StatusOK {
 		log.Println("got a bad response:", response.StatusCode, response.Status)
-		//return response, err
+		return err
 	}
 	responseBytes, err := ioutil.ReadAll(response.Body)
 	if err != nil {
 		log.Println("[ERROR] ioutil.ReadAll:", err)
-		//return nil, err
+		return err
 	}
-	//log.Printf("[doArmoireRequest][response]: %#v\n", string(responseBytes))
 
-	var user User
-	err = json.Unmarshal(responseBytes, &user)
+	err = json.Unmarshal(responseBytes, &this.User)
 	if err != nil {
-		log.Println("json.Unmarshal error:", err)
+		log.Println("[ERROR] json.Unmarshal:", err)
+		return err
 	}
-	user.StatusCode = response.StatusCode
-
-	return user
+	return nil
 }
 
 func BuildAddress(version, action string) string {
-	return LIVE_HOST + path.Join(API_PATH, version, action)
+	return LiveHost + path.Join(ApiPath, version, action)
 }
 
-const API_PATH string = "api"
-const LIVE_HOST string = "https://habitica.com/"
+const ApiPath string = "api"
+const ApiVersion string = "v3"
+const LiveHost string = "https://habitica.com/"

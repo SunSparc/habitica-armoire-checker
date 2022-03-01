@@ -2,9 +2,9 @@ package main
 
 type User struct {
 	StatusCode int
-	Success    bool     `json:"success"`
+	Success    bool     `json:"success"` // unneeded field, http response code covers this
 	Data       UserData `json:"data,omitempty"`
-	AppVersion string   `json:"appVersion"` //  "appVersion": "4.206.0"
+	AppVersion string   `json:"appVersion"` //  "appVersion": "4.206.0" // should not be a field, could be a header
 }
 
 type UserData struct {
@@ -45,5 +45,5 @@ type ArmoireChecker struct {
 	InitialGold float64
 	DropsMap    map[string][]Armoire
 	DropsCount  int64
-	*Config
+	*Requester
 }
