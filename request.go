@@ -19,22 +19,20 @@ func NewRequester() *Requester {
 	}
 }
 
-func (this *Requester) getGoldAmount() (float64, error) {
+func (this *Requester) getGoldAmount() error {
 	err := this.doTheRequest(http.MethodGet, "user?userFields=stats.gp")
-	if false { // todo
-		return 0, err
+	if err != nil {
+		return err
 	}
-
-	return this.User.Data.Stats.Gold, nil
+	return nil
 }
-func (this *Requester) checkArmoire() User {
+func (this *Requester) checkArmoire() error {
 	//https://habitica.com/api/v3/user/buy-armoire
 	err := this.doTheRequest(http.MethodPost, "user/buy-armoire")
 	if err != nil {
-		return User{} // todo
+		return err
 	}
-
-	return this.User
+	return nil
 }
 
 func (this *Requester) doTheRequest(method, action string) error {
@@ -42,6 +40,7 @@ func (this *Requester) doTheRequest(method, action string) error {
 	request, err := http.NewRequest(method, BuildAddress(ApiVersion, action), nil)
 	if err != nil {
 		log.Println("[ERROR] http.NewRequest:", err)
+		return err
 	}
 
 	request.Header.Set("Content-Type", "application/json")

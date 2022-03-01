@@ -41,34 +41,34 @@ func (this *ArmoireChecker) run() {
 	}
 }
 func (this *ArmoireChecker) check() bool {
-	gold, err := this.getGoldAmount()
-	if this.InitialGold <= 0 {
-		this.InitialGold = gold
-	}
+	err := this.getGoldAmount()
 	if err != nil {
-		log.Println("main.getGoldAmount error:", err)
+		log.Println("[ERROR] getGoldAmount:", err)
 		return false
 	}
+	if this.InitialGold <= 0 {
+		this.InitialGold = this.User.Data.Stats.Gold
+	}
 	//log.Println("gold:", gold)
-	if gold < 55000 { // TODO: accept minimum gold level as parameter
+	if this.User.Data.Stats.Gold < 55000 { // TODO: accept minimum gold level as parameter
 		fmt.Println("No more gold, go earn some more :)")
 		return false
 	}
-	response := this.checkArmoire()
+	err = this.checkArmoire()
 	if err != nil {
 		return false
 	}
-	this.recordResponse(response)
+	this.recordResponse()
 	return true
 }
-func (this *ArmoireChecker) recordResponse(response User) {
-	if !response.Data.Flags.ArmoireOpened {
+func (this *ArmoireChecker) recordResponse() {
+	if !this.User.Data.Flags.ArmoireOpened {
 		log.Println("[WARN] Armoire is not opened. How does that work?")
 	}
-	if !response.Data.Flags.ArmoireEnabled {
+	if !this.User.Data.Flags.ArmoireEnabled {
 		log.Println("[WARN] Armoire is not enabled. Why?")
 	}
-	if !response.Data.Flags.ArmoireEmpty {
+	if !this.User.Data.Flags.ArmoireEmpty {
 		//log.Println("[WARN] Armoire is not empty. That means we get some new gear. :)")
 		// todo-maybe: make a toggle that announces when the empty status of the Armoire changes.
 	}
@@ -76,7 +76,7 @@ func (this *ArmoireChecker) recordResponse(response User) {
 	//log.Printf("response.Data.Armoire: %v\n", response.Data.Armoire)
 	fmt.Print("*")
 
-	this.DropsMap[response.Data.Armoire.Type] = append(this.DropsMap[response.Data.Armoire.Type], response.Data.Armoire)
+	this.DropsMap[this.User.Data.Armoire.Type] = append(this.DropsMap[this.User.Data.Armoire.Type], this.User.Data.Armoire)
 	this.DropsCount = this.DropsCount + 1
 }
 func (this *ArmoireChecker) report() {
