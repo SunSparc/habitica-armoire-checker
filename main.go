@@ -55,7 +55,7 @@ func (this *ArmoireChecker) check() bool {
 		return false
 	}
 	response := this.checkArmoire()
-	if !responseIsFavorable(response) {
+	if err != nil {
 		return false
 	}
 	this.recordResponse(response)
@@ -78,19 +78,6 @@ func (this *ArmoireChecker) recordResponse(response User) {
 
 	this.DropsMap[response.Data.Armoire.Type] = append(this.DropsMap[response.Data.Armoire.Type], response.Data.Armoire)
 	this.DropsCount = this.DropsCount + 1
-}
-func responseIsFavorable(response User) bool {
-	if response.StatusCode == 200 &&
-		response.Success &&
-		response.Data.Flags.ArmoireEnabled {
-		return true
-	}
-	log.Println("response was not favorable:")
-	log.Println("response.StatusCode:", response.StatusCode)
-	log.Println("response.Success:", response.Success)
-	log.Println("response.Data.Flags.ArmoireEnabled:", response.Data.Flags.ArmoireEnabled)
-	log.Println("response.Data.Flags.ArmoireEmpty:", response.Data.Flags.ArmoireEmpty)
-	return false
 }
 func (this *ArmoireChecker) report() {
 	fmt.Printf("\nYou started with %.0f gold.\n", this.InitialGold)
