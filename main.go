@@ -41,20 +41,10 @@ func (this *ArmoireChecker) run() {
 	}
 }
 func (this *ArmoireChecker) check() bool {
-	err := this.getGoldAmount()
-	if err != nil {
-		log.Println("[ERROR] getGoldAmount:", err)
+	if !this.goldReservesAreAdequate() {
 		return false
 	}
-	if this.InitialGold <= 0 {
-		this.InitialGold = this.User.Data.Stats.Gold
-	}
-	//log.Println("gold:", gold)
-	if this.User.Data.Stats.Gold < 55000 { // TODO: accept minimum gold level as parameter
-		fmt.Println("No more gold, go earn some more :)")
-		return false
-	}
-	err = this.checkArmoire()
+	err := this.checkArmoire()
 	if err != nil {
 		return false
 	}
@@ -78,4 +68,22 @@ func (this *ArmoireChecker) recordResponse() {
 
 	this.DropsMap[this.User.Data.Armoire.Type] = append(this.DropsMap[this.User.Data.Armoire.Type], this.User.Data.Armoire)
 	this.DropsCount = this.DropsCount + 1
+}
+
+func (this *ArmoireChecker) goldReservesAreAdequate() bool {
+	err := this.getGoldAmount()
+	if err != nil {
+		log.Println("[ERROR] getGoldAmount:", err)
+		return false
+	}
+	if this.InitialGold <= -1 {
+		this.InitialGold = this.User.Data.Stats.Gold
+		// TODO: ask user how much gold they want to use
+	}
+	//log.Println("gold:", gold)
+	if this.User.Data.Stats.Gold < this.SpentLimit {
+		fmt.Println("No more gold, go earn some more :)")
+		return false
+	}
+	return true
 }
