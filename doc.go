@@ -43,6 +43,7 @@ type Armoire struct {
 
 type ArmoireChecker struct {
 	InitialGold float64
+	SpentLimit  float64
 	DropsMap    map[string][]Armoire
 	DropsCount  int64
 	*Requester

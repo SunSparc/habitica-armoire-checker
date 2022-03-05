@@ -17,11 +17,12 @@ func main() {
 }
 
 func NewArmoireChecker() *ArmoireChecker {
-	//config := NewConfig(APIClient)
 	return &ArmoireChecker{
-		//Config:   config,
-		Requester: NewRequester(),
-		DropsMap:  map[string][]Armoire{},
+		InitialGold: -1,
+		SpentLimit:  55000, // todo
+		Requester:   NewRequester(),
+		DropsCount:  0,
+		DropsMap:    map[string][]Armoire{},
 	}
 }
 func (this *ArmoireChecker) run() {
