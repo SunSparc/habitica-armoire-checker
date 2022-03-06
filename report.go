@@ -5,6 +5,8 @@ import (
 	"log"
 )
 
+// todo: do a partial report on each check so that we are not collecting system memory endlessly
+
 func (this *ArmoireChecker) report() {
 	fmt.Printf("\nYou started with %.0f gold.\n", this.InitialGold)
 	fmt.Printf("There were %d drops from your Enchanted Armoire.\n", this.DropsCount)

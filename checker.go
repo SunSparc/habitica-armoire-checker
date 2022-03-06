@@ -7,19 +7,22 @@ import (
 )
 
 func NewArmoireChecker() *ArmoireChecker {
+	config := NewConfig(APIClient)
 	return &ArmoireChecker{
-		InitialGold: -1,
-		SpentLimit:  55000, // todo
-		Requester:   NewRequester(),
-		DropsCount:  0,
-		DropsMap:    map[string][]Armoire{},
+		InitialGold:   -1,
+		SpendingLimit: config.SpendingLimit,
+		Requester:     NewRequester(*config),
+		DropsCount:    0,
+		DropsMap:      map[string][]Armoire{},
 	}
 }
+
 func (this *ArmoireChecker) run() {
-	//os.Exit(0)
 	fmt.Println("Checking your Enchanted Armoire")
 	defer this.report()
-	// todo: create ticker/timer to watch channels with termination signals
+	// todo: how do we want users to stop the application? watch for keypress? listen for signal? Escape key at any time?
+	//       what if the application is canceled(signaled)?
+	//       create ticker/timer to watch channels with termination signals
 
 	for x := 0; x <= 5; x++ {
 		if !this.check() {
@@ -32,6 +35,7 @@ func (this *ArmoireChecker) run() {
 		}
 	}
 }
+
 func (this *ArmoireChecker) check() bool {
 	if !this.goldReservesAreAdequate() {
 		return false
@@ -70,11 +74,9 @@ func (this *ArmoireChecker) goldReservesAreAdequate() bool {
 	}
 	if this.InitialGold <= -1 {
 		this.InitialGold = this.User.Data.Stats.Gold
-		// TODO: ask user how much gold they want to use
 	}
-	//log.Println("gold:", gold)
-	if this.User.Data.Stats.Gold < this.SpentLimit {
-		fmt.Println("No more gold, go earn some more :)")
+	if this.User.Data.Stats.Gold < this.SpendingLimit {
+		fmt.Println("No more gold. Go earn some more. =)")
 		return false
 	}
 	return true

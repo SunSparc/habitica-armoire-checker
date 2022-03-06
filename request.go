@@ -9,13 +9,17 @@ import (
 )
 
 type Requester struct {
-	config *Config
-	User   User
+	userID    string
+	userToken string
+	apiClient string
+	User      User
 }
 
-func NewRequester() *Requester {
+func NewRequester(config Config) *Requester {
 	return &Requester{
-		config: NewConfig(APIClient),
+		userID:    config.UserID,
+		userToken: config.UserToken,
+		apiClient: config.APIClient,
 	}
 }
 
@@ -44,9 +48,9 @@ func (this *Requester) doTheRequest(method, action string) error {
 	}
 
 	request.Header.Set("Content-Type", "application/json")
-	request.Header.Set("x-api-user", this.config.UserID)
-	request.Header.Set("x-api-key", this.config.UserToken)
-	request.Header.Set("x-client", this.config.APIClient)
+	request.Header.Set("x-api-user", this.userID)
+	request.Header.Set("x-api-key", this.userToken)
+	request.Header.Set("x-client", this.apiClient)
 
 	response, err := client.Do(request)
 	if err != nil {

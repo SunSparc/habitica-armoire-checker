@@ -38,20 +38,17 @@ func (this *Config) setup() {
 	if configFileExists() {
 		err := this.readConfigFile()
 		if err != nil {
-			log.Println("[ERROR] reading the config:", err)
+			log.Println("[WARN] there was a problem reading from the configuration file:", err)
+		} else {
+			return
 		}
-		return
 	}
 
 	this.readConfigFromUser()
 
-	writeConfigFile(this)
-
-	fmt.Println("You entered:")
-	fmt.Println("user id:", this.UserID)
-	fmt.Println("api token:", this.UserToken)
-	os.Exit(1)
-
+	if !writeConfigFile(this) {
+		fmt.Println("Unable to write the configuration file.")
+	}
 }
 
 func configFileExists() bool {
@@ -61,6 +58,7 @@ func configFileExists() bool {
 	}
 	return true
 }
+
 func (this *Config) readConfigFile() error {
 	fileBytes, err := ioutil.ReadFile(configFilename)
 	if err != nil {
@@ -78,14 +76,10 @@ func (this *Config) readConfigFile() error {
 	this.UserID = config.UserID
 	return nil
 }
-func (this *Config) readConfigFromUser() {
-	introText := `This app requires you to enter your Habitica User ID and API Token.
-You can find both of those here:
-https://habitica.com/user/settings/api
 
-These credentials will be stored on your computer so that you do not need to enter them each time.`
+func (this *Config) readConfigFromUser() {
 	var err error
-	fmt.Println(introText)
+	fmt.Println(configText)
 	fmt.Print("Enter your Habitica User ID:")
 	reader := bufio.NewReader(os.Stdin)
 	this.UserID, err = reader.ReadString('\n')
@@ -117,9 +111,18 @@ func writeConfigFile(config *Config) bool {
 func (this *Config) ensureAPIClient() {
 	apiClient := os.Getenv("HABITICA_API_CLIENT")
 	if this.APIClient == "" && apiClient == "" {
-		log.Fatal("[ERROR] API Client fields is not set.")
+		log.Fatal("[ERROR] API Client field is not set.")
 	}
 	this.APIClient = apiClient
 }
 
-const configFilename string = "config.json"
+const (
+	configFilename string = "config.json"
+	configText     string = `
+This app requires you to enter your Habitica User ID and API Token.
+You can find both of those here:
+https://habitica.com/user/settings/api
+
+These credentials will be stored on your computer so that
+you do not need to enter them each time you run this application.`
+)
