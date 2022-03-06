@@ -29,8 +29,7 @@ type UserFlags struct {
 	ArmoireEmpty bool `json:"armoireEmpty"`
 	// todo: if armoire is not enabled, terminate
 	ArmoireEnabled bool `json:"armoireEnabled"`
-	// ??
-	ArmoireOpened bool `json:"armoireOpened"`
+	ArmoireOpened  bool `json:"armoireOpened"`
 }
 
 type Armoire struct {

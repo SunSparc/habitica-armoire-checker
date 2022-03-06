@@ -10,8 +10,11 @@ var APIClient string
 
 func main() {
 	NewArmoireChecker().run()
+	// todo: before we start running the checker, see how much gold is available
 
 	// todo: how do we want users to stop the application? watch for keypress? listen for signal?
+	// todo: get the name of the user for personalization
+	// todo: how do we want users to stop the application? watch for keypress? listen for signal? Escape key at any time?
 	// todo: what if the application is canceled(signaled)?
 	// todo: do a partial report on each check so that we are not collecting system memory endlessly
 }
@@ -29,6 +32,7 @@ func (this *ArmoireChecker) run() {
 	//os.Exit(0)
 	fmt.Println("Checking your Enchanted Armoire")
 	defer this.report()
+	// todo: create ticker/timer to watch channels with termination signals
 
 	for x := 0; x <= 5; x++ {
 		if !this.check() {
