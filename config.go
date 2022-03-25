@@ -16,9 +16,10 @@ import (
 // os.Getenv("HABITICA_API_CLIENT")
 
 type Config struct {
-	UserID    string `json:"user_id"`
-	UserToken string `json:"user_token"`
-	APIClient string `json:"-"`
+	UserID        string  `json:"user_id"`
+	UserToken     string  `json:"user_token"`
+	APIClient     string  `json:"-"`
+	SpendingLimit float64 `json:"spending_limit"`
 }
 
 func NewConfig(apiClient string) *Config {
@@ -93,7 +94,19 @@ func (this *Config) readConfigFromUser() {
 		log.Printf("[ERROR] reading api token: %s; err: %s\n", this.UserToken, err)
 	}
 	this.UserToken = strings.TrimSpace(this.UserToken)
+
+	spendingLimit, err := reader.ReadString('\n')
+	if err != nil {
+		log.Printf("[ERROR] reading spending limit")
+	}
+	this.SpendingLimit, err = strconv.ParseFloat(spendingLimit, 64)
+
+	fmt.Println("You entered:")
+	fmt.Println("- user id:", this.UserID)
+	fmt.Println("- api token:", this.UserToken)
+	fmt.Println("- spending limit:", this.SpendingLimit)
 }
+
 func writeConfigFile(config *Config) bool {
 	configBytes, err := json.Marshal(config)
 	if err != nil {
