@@ -7,6 +7,7 @@ import (
 	"io/ioutil"
 	"log"
 	"os"
+	"strconv"
 	"strings"
 )
 
@@ -37,7 +38,20 @@ func newConfig(apiClient string) *Config {
 func (this *Config) setup() {
 	this.ensureAPIClient()
 	if configFileExists() {
-		err := this.readConfigFile()
+		// TODO: give the user the choice to use the existing config or make a new one
+		fmt.Println("Welcome back. Shall we use the credentials you entered last time?")
+		fmt.Println(" - Use existing (Y)") // todo: default
+		fmt.Println(" - Enter new credentials (N)")
+		fmt.Print("(Y or N): ")
+		reader := bufio.NewReader(os.Stdin)
+		keepOrNew, err := reader.ReadString('\n')
+		if err != nil {
+			log.Printf("[ERROR] reading user id: %s; err: %s\n", keepOrNew, err)
+		}
+		keepOrNew = strings.TrimSpace(keepOrNew)
+		fmt.Println("Ok, we will...", keepOrNew)
+
+		err = this.readConfigFile()
 		if err != nil {
 			log.Println("[WARN] there was a problem reading from the configuration file:", err)
 		} else {
