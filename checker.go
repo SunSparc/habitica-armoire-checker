@@ -1,12 +1,13 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"time"
 )
 
-func NewArmoireChecker() *ArmoireChecker {
+func NewArmoireChecker(ctx context.Context) *ArmoireChecker {
 	config := NewConfig(APIClient)
 	return &ArmoireChecker{
 		InitialGold:   -1,
@@ -17,11 +18,10 @@ func NewArmoireChecker() *ArmoireChecker {
 	}
 }
 
-func (this *ArmoireChecker) run() {
+func (this *ArmoireChecker) Run() {
 	fmt.Println("Checking your Enchanted Armoire")
 	defer this.report()
-	// todo: how do we want users to stop the application? watch for keypress? listen for signal? Escape key at any time?
-	//       what if the application is canceled(signaled)?
+	// todo: what if the application is canceled(signaled)?
 	//       create ticker/timer to watch channels with termination signals
 
 	for x := 0; x <= 5; x++ {

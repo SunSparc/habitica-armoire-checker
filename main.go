@@ -1,17 +1,24 @@
 package main
 
-import "fmt"
+import (
+	"context"
+	"fmt"
+)
 
 var APIClient string
 
 func main() {
 	fmt.Println(welcomeText)
-	NewArmoireChecker().run()
+	ctx, cancel := context.WithCancel(context.Background())
+	NewArmoireChecker(ctx).Run()     // todo: go
+	NewEscapeMode(ctx, cancel).Run() // todo: run this while the checker is going
 
 	// todo: get the name of the user for personalization
 }
 
 const welcomeText = `
-Welcome to the Habitica Armoire Checker
-========================================
+Habitica Armoire Checker
+=========================
 `
+
+////////////////////////////////////

@@ -2,3 +2,7 @@ github.com/smartystreets/assertions v1.2.1 h1:bKNHfEv7tSIjZ8JbKaFjzFINljxG4lzZvm
 github.com/smartystreets/assertions v1.2.1/go.mod h1:wDmR7qL282YbGsPy6H/yAsesrxfxaaSlJazyFLYVFx8=
 github.com/smartystreets/gunit v1.4.3 h1:yhnYXSXKK/R5vaUVGZD1zw4CQZqwtor7pp0VXBbMDrc=
 github.com/smartystreets/gunit v1.4.3/go.mod h1:ciyZ4dVTN2S8npQ4g9lMdARLX5XboUpcq5O7N6GlQmw=
+golang.org/x/sys v0.0.0-20210615035016-665e8c7367d1 h1:SrN+KX8Art/Sf4HNj6Zcz06G7VEz+7w9tdXTPOZ7+l4=
+golang.org/x/sys v0.0.0-20210615035016-665e8c7367d1/go.mod h1:oPkhp1MJrh7nUepCBck5+mAzfO9JrbApNNgaTdGDITg=
+golang.org/x/term v0.0.0-20210927222741-03fcf44c2211 h1:JGgROgKl9N8DuW20oFS5gxc+lE67/N3FcwmBPMe7ArY=
+golang.org/x/term v0.0.0-20210927222741-03fcf44c2211/go.mod h1:jbD1KX2456YbFQfuXm/mYQcufACuNUgVhRMnK/tPxf8=
