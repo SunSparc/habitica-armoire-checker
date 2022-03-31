@@ -75,8 +75,12 @@ func (this *ArmoireChecker) goldReservesAreAdequate() bool {
 	if this.InitialGold <= -1 {
 		this.InitialGold = this.User.Data.Stats.Gold
 	}
-	if this.User.Data.Stats.Gold < this.SpendingLimit {
-		fmt.Println("No more gold. Go earn some more. =)")
+	if (this.User.Data.Stats.Gold - 100) < this.SpendingLimit {
+		fmt.Println("Spending limit reached. Change the limit or go earn some more gold. =)")
+		return false
+	}
+	if (this.User.Data.Stats.Gold - 100) < 0 {
+		fmt.Println("Insufficient funds.")
 		return false
 	}
 	return true
