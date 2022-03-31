@@ -8,7 +8,10 @@ import (
 // todo: do a partial report on each check so that we are not collecting system memory endlessly
 
 func (this *ArmoireChecker) report() {
-	fmt.Printf("\nYou started with %.0f gold.\n", this.InitialGold)
+	// todo: if we did no work, report that nothing was done, instead of saying "you started with no gold, etc..."
+	fmt.Printf("\nREPORT")
+	fmt.Printf("-------")
+	fmt.Printf("You started with %s gold.\n", showMeTheMoney(this.InitialGold))
 	fmt.Printf("There were %d drops from your Enchanted Armoire.\n", this.DropsCount)
 	//log.Printf("Armoire dropsmap: %#v\n", this.DropsMap)
 	for dropType, drops := range this.DropsMap {
@@ -37,4 +40,11 @@ func (this *ArmoireChecker) report() {
 			log.Println("unknown dropType:", dropType, drops)
 		}
 	}
+}
+
+func showMeTheMoney(gold float64) string {
+	if gold <= 0 {
+		return "no"
+	}
+	return fmt.Sprintf("%.0f", gold)
 }
