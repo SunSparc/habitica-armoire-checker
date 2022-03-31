@@ -37,32 +37,36 @@ func newConfig(apiClient string) *Config {
 
 func (this *Config) setup() {
 	this.ensureAPIClient()
+	this.getConfigValues()
+
+	if !writeConfigFile(this) {
+		fmt.Println("Unable to write the configuration file.")
+	}
+}
+
+func (this *Config) getConfigValues() {
+	// if file does not exist -> get configs from user
+	// if file does exist & user wants new configs -> get configs from user
+	// if file does exist & user wants old configs -> get configs from file
 	if configFileExists() {
-		// TODO: give the user the choice to use the existing config or make a new one
 		fmt.Println("Welcome back. Shall we use the credentials you entered last time?")
-		fmt.Println(" - Use existing (Y)") // todo: default
-		fmt.Println(" - Enter new credentials (N)")
 		fmt.Print("(Y or N): ")
 		reader := bufio.NewReader(os.Stdin)
 		keepOrNew, err := reader.ReadString('\n')
 		if err != nil {
-			log.Printf("[ERROR] reading user id: %s; err: %s\n", keepOrNew, err)
+			log.Printf("[ERROR] reading configuration choice: %s; err: %s\n", keepOrNew, err)
 		}
-		keepOrNew = strings.TrimSpace(keepOrNew)
-		fmt.Println("Ok, we will...", keepOrNew)
+		if strings.ContainsRune(strings.ToLower(strings.TrimSpace(keepOrNew)), 'n') {
+			fmt.Println("[DEV] getting new config values:", keepOrNew)
+			this.readConfigFromUser()
+			return
+		}
+		fmt.Println("[DEV] getting configuration from file:", keepOrNew)
 
 		err = this.readConfigFile()
 		if err != nil {
 			log.Println("[WARN] there was a problem reading from the configuration file:", err)
-		} else {
-			return
 		}
-	}
-
-	this.readConfigFromUser()
-
-	if !writeConfigFile(this) {
-		fmt.Println("Unable to write the configuration file.")
 	}
 }
 
