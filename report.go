@@ -9,8 +9,8 @@ import (
 
 func (this *ArmoireChecker) report() {
 	// todo: if we did no work, report that nothing was done, instead of saying "you started with no gold, etc..."
-	fmt.Printf("\nREPORT")
-	fmt.Printf("-------")
+	fmt.Printf("\nREPORT\n")
+	fmt.Println("-------")
 	fmt.Printf("You started with %s gold.\n", showMeTheMoney(this.InitialGold))
 	fmt.Printf("There were %d drops from your Enchanted Armoire.\n", this.DropsCount)
 	//log.Printf("Armoire dropsmap: %#v\n", this.DropsMap)
@@ -40,6 +40,7 @@ func (this *ArmoireChecker) report() {
 			log.Println("unknown dropType:", dropType, drops)
 		}
 	}
+	fmt.Println("-------")
 }
 
 func showMeTheMoney(gold float64) string {
