@@ -2,6 +2,8 @@ package main
 
 import (
 	"encoding/json"
+	"errors"
+	"fmt"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -41,7 +43,7 @@ func (this *Requester) checkArmoire() error {
 
 func (this *Requester) doTheRequest(method, action string) error {
 	client := http.Client{}
-	request, err := http.NewRequest(method, BuildAddress(ApiVersion, action), nil)
+	request, err := http.NewRequest(method, buildAddress(ApiVersion, action), nil)
 	if err != nil {
 		log.Println("[ERROR] http.NewRequest:", err)
 		return err
@@ -57,9 +59,8 @@ func (this *Requester) doTheRequest(method, action string) error {
 		log.Println("[ERROR] client.Do:", err)
 		return err
 	}
-	if response.StatusCode != http.StatusOK {
-		log.Println("got a bad response:", response.StatusCode, response.Status)
-		return err
+	if analyzeResponse(response.StatusCode) {
+		return errors.New(response.Status)
 	}
 	responseBytes, err := ioutil.ReadAll(response.Body)
 	if err != nil {
@@ -75,7 +76,20 @@ func (this *Requester) doTheRequest(method, action string) error {
 	return nil
 }
 
-func BuildAddress(version, action string) string {
+func analyzeResponse(code int) bool {
+	if code == http.StatusOK {
+		return true
+	}
+	if code == http.StatusUnauthorized {
+		fmt.Println("Habitica reports that the credentials you provided are not authorized to access your account.")
+		// todo: do initial request in config so that user does not need to restart the application
+		fmt.Println("Run this program again and choose to re-enter your credentials.")
+		// todo: send cancel signal
+	}
+	return false
+}
+
+func buildAddress(version, action string) string {
 	return LiveHost + path.Join(ApiPath, version, action)
 }
 
