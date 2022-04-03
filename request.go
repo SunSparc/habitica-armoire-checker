@@ -17,7 +17,7 @@ type Requester struct {
 	User      User
 }
 
-func NewRequester(config Config) *Requester {
+func NewRequester(config *Config) *Requester {
 	return &Requester{
 		userID:    config.UserID,
 		userToken: config.UserToken,

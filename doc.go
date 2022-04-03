@@ -41,8 +41,8 @@ type Armoire struct {
 }
 
 type ArmoireChecker struct {
-	InitialGold   float64
-	SpendingLimit float64
+	InitialGold   int64
+	SpendingLimit int64
 	DropsMap      map[string][]Armoire
 	DropsCount    int64 // todo: track lifetime drops between sessions
 	*Requester

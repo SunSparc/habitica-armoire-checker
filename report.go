@@ -7,6 +7,8 @@ import (
 
 // todo: do a partial report on each check so that we are not collecting system memory endlessly
 
+// todo: take all the report text and send it to a formatter to make the output look nice
+
 func (this *ArmoireChecker) report() {
 	// todo: if we did no work, report that nothing was done, instead of saying "you started with no gold, etc..."
 	fmt.Printf("\nREPORT\n")
