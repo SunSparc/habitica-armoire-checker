@@ -21,7 +21,7 @@ type RequestFixture struct {
 }
 
 func (this *RequestFixture) Setup() {
-	this.requester = NewRequester()
+	this.requester = NewRequester(&Config{})
 	this.request = httptest.NewRequest(http.MethodGet, "/test", nil)
 }
 

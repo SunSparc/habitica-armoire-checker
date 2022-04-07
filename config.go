@@ -16,20 +16,22 @@ import (
 // os.Getenv("HABITICA_API_CLIENT")
 
 type Config struct {
-	UserID    string `json:"user_id"`
-	UserToken string `json:"user_token"`
-	APIClient string `json:"-"`
+	UserID         string `json:"user_id"`
+	UserToken      string `json:"user_token"`
+	apiClient      string // `json:"-"`
+	resetRequested bool
 }
 
-func NewConfig(apiClient string) *Config {
+func NewConfig(apiClient string, reset bool) *Config {
 	config := newConfig(apiClient)
+	config.resetRequested = reset
 	config.setup()
 	return config
 }
 
 func newConfig(apiClient string) *Config {
 	return &Config{
-		APIClient: apiClient,
+		apiClient: apiClient,
 	}
 }
 
@@ -46,8 +48,8 @@ func (this *Config) getConfigValues() {
 	// if file does not exist -> get configs from user
 	// if file does exist & user wants new configs -> get configs from user
 	// if file does exist & user wants old configs -> get configs from file
-	if configFileExists() {
-		fmt.Println("Welcome back. Shall we use the credentials you entered last time?")
+	if configFileExists() && !this.resetRequested {
+		fmt.Printf("Welcome back!\n\nShall we use the credentials you entered\n  last time?\n\n")
 		fmt.Print("(Y or N): ")
 		reader := bufio.NewReader(os.Stdin)
 		keepOrNew, err := reader.ReadString('\n')
@@ -55,17 +57,19 @@ func (this *Config) getConfigValues() {
 			log.Printf("[ERROR] reading configuration choice: %s; err: %s\n", keepOrNew, err)
 		}
 		if strings.ContainsRune(strings.ToLower(strings.TrimSpace(keepOrNew)), 'n') {
-			fmt.Println("[DEV] getting new config values:", keepOrNew)
+			//fmt.Println("[DEV] getting new config values:", keepOrNew) // DEV
 			this.readConfigFromUser()
 			return
 		}
-		fmt.Println("[DEV] getting configuration from file:", keepOrNew)
+		//fmt.Println("[DEV] getting configuration from file:", keepOrNew) // DEV
 
 		err = this.readConfigFile()
-		if err != nil {
-			log.Println("[WARN] there was a problem reading from the configuration file:", err)
+		if err == nil {
+			return
 		}
+		log.Println("[WARN] there was a problem reading from the configuration file:", err)
 	}
+	this.readConfigFromUser()
 }
 
 func configFileExists() bool {
@@ -88,7 +92,7 @@ func (this *Config) readConfigFile() error {
 		log.Println("[ERROR] json.Unmarshal config file:", err)
 		return err
 	}
-	log.Printf("[DEV] config: %#v\n", config)
+	//log.Printf("[DEV] config: %#v\n", config) // DEV
 	this.UserToken = config.UserToken
 	this.UserID = config.UserID
 	return nil
@@ -111,9 +115,7 @@ func (this *Config) readConfigFromUser() {
 	}
 	this.UserToken = strings.TrimSpace(this.UserToken)
 
-	fmt.Println("You entered:")
-	fmt.Println("- user id:", this.UserID)
-	fmt.Println("- api token:", this.UserToken)
+	fmt.Println()
 }
 
 func writeConfigFile(config *Config) bool {
@@ -127,24 +129,30 @@ func writeConfigFile(config *Config) bool {
 		log.Println("[ERROR] writeConfigFile ioutil.WriteFile:", err)
 		return false
 	}
+	fmt.Printf("")
 	return true
 }
 
 func (this *Config) ensureAPIClient() {
 	apiClient := os.Getenv("HABITICA_API_CLIENT")
-	if this.APIClient == "" && apiClient == "" {
+	if this.apiClient == "" && apiClient == "" {
 		log.Fatal("[ERROR] API Client field is not set.")
 	}
-	this.APIClient = apiClient
+	this.apiClient = apiClient
 }
 
 const (
 	configFilename string = "config.json"
 	configText     string = `
-This app requires you to enter your Habitica User ID and API Token.
-You can find both of those here:
-https://habitica.com/user/settings/api
+This application requires you to enter
+your Habitica User ID and API Token.
 
-These credentials will be stored on your computer so that
-you do not need to enter them each time you run this application.`
+You can find both of those here:
+  https://habitica.com/user/settings/api
+
+These credentials will be stored on
+  your computer so that you do not need
+  to enter them each time you run this
+  application.
+`
 )

@@ -45,7 +45,7 @@ func (this *ArmoireChecker) report() {
 	fmt.Println("-------")
 }
 
-func showMeTheMoney(gold float64) string {
+func showMeTheMoney(gold int64) string {
 	if gold <= 0 {
 		return "no"
 	}

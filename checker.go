@@ -7,6 +7,7 @@ import (
 	"log"
 	"os"
 	"strconv"
+	"strings"
 	"time"
 )
 
@@ -19,8 +20,19 @@ func NewArmoireChecker() *ArmoireChecker {
 }
 
 func (this *ArmoireChecker) Run(ctx context.Context) {
-	this.getInitialGold()
+	reset := false
+	for {
+		this.Requester = NewRequester(NewConfig(APIClient, reset))
+		if this.getInitialGold() {
+			break
+		}
+		reset = true
+	}
 	this.getSpendLimit()
+	this.manageChecker(ctx)
+}
+
+func (this *ArmoireChecker) manageChecker(ctx context.Context) {
 	// todo: use the context
 
 	fmt.Println("Checking your Enchanted Armoire")
@@ -40,30 +52,37 @@ func (this *ArmoireChecker) Run(ctx context.Context) {
 	}
 }
 
-func (this *ArmoireChecker) getInitialGold() {
+func (this *ArmoireChecker) getInitialGold() bool {
 	err := this.getGoldAmount()
 	if err != nil {
 		log.Println("[ERROR] getGoldAmount:", err)
-		return
+		return false
 	}
 	this.InitialGold = int64(this.User.Data.Stats.Gold)
+	fmt.Println("\nSuccess! We are connected to Habitica.")
+	fmt.Println("----------------------------------------")
+	fmt.Println()
+	return true
 }
 func (this *ArmoireChecker) getSpendLimit() {
-	fmt.Printf("The Enchanted Armoire requires 100 gold each time it is opened.")
-	fmt.Printf("You currently have %d gold.\n", this.InitialGold)
+	fmt.Printf("The Enchanted Armoire requires 100 gold\n  each time it is opened.\n")
+	fmt.Printf("\nYou currently have %d gold.\n", this.InitialGold)
 
 	fmt.Println("You can spend it all! Or set a limit.")
-	fmt.Println("- 0 (no limit)")
-	fmt.Println("- 1000 (example: only spend 1000 gold)")
-	fmt.Print("Limit: ")
+	fmt.Println("  Examples:")
+	fmt.Println("  - 0 (no limit, Spend it all!!)")
+	fmt.Println("  - 1000 (only spend 1000 gold)")
+	fmt.Println()
+	fmt.Print("Spending Limit: ")
 	reader := bufio.NewReader(os.Stdin)
 	spendingLimit, err := reader.ReadString('\n')
 	if err != nil {
 		log.Println("[ERROR] reading spending limit:", err)
 	}
-	this.SpendingLimit, err = strconv.ParseInt(spendingLimit, 10, 64)
+	this.SpendingLimit, err = strconv.ParseInt(strings.TrimSpace(spendingLimit), 10, 64)
 	if err != nil {
-		log.Println("[ERROR]", err)
+		// todo: what if the user is silly and inputs text or other nonsense other than numbers?
+		log.Printf("Sweet! We are just going to blow through\n  the whole pile of gold!\n\n")
 	}
 }
 

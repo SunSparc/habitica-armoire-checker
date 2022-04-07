@@ -21,7 +21,7 @@ func NewRequester(config *Config) *Requester {
 	return &Requester{
 		userID:    config.UserID,
 		userToken: config.UserToken,
-		apiClient: config.APIClient,
+		apiClient: config.apiClient,
 	}
 }
 
@@ -53,13 +53,14 @@ func (this *Requester) doTheRequest(method, action string) error {
 	request.Header.Set("x-api-user", this.userID)
 	request.Header.Set("x-api-key", this.userToken)
 	request.Header.Set("x-client", this.apiClient)
+	//log.Println("[DEV] header values:", this.userID, this.userToken, this.apiClient)
 
 	response, err := client.Do(request)
 	if err != nil {
 		log.Println("[ERROR] client.Do:", err)
 		return err
 	}
-	if analyzeResponse(response.StatusCode) {
+	if !responseIsOk(response.StatusCode) {
 		return errors.New(response.Status)
 	}
 	responseBytes, err := ioutil.ReadAll(response.Body)
@@ -76,15 +77,15 @@ func (this *Requester) doTheRequest(method, action string) error {
 	return nil
 }
 
-func analyzeResponse(code int) bool {
+func responseIsOk(code int) bool {
 	if code == http.StatusOK {
 		return true
 	}
 	if code == http.StatusUnauthorized {
-		fmt.Println("Habitica reports that the credentials you provided are not authorized to access your account.")
-		// todo: do initial request in config so that user does not need to restart the application
-		fmt.Println("Run this program again and choose to re-enter your credentials.")
+		fmt.Println(unauthorizedText)
 		// todo: send cancel signal
+	} else {
+		fmt.Println("[ERROR] Habitica response code:", code)
 	}
 	return false
 }
@@ -96,3 +97,10 @@ func buildAddress(version, action string) string {
 const ApiPath string = "api"
 const ApiVersion string = "v3"
 const LiveHost string = "https://habitica.com/"
+
+const (
+	unauthorizedText = `
+Habitica reports that the credentials
+  you provided are not authorized to
+  access your account.`
+)
