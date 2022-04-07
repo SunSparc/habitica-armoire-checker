@@ -46,4 +46,5 @@ type ArmoireChecker struct {
 	DropsMap      map[string][]Armoire
 	DropsCount    int64 // todo: track lifetime drops between sessions
 	*Requester
+	*EscapeMode
 }

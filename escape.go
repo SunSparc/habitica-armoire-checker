@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"fmt"
 	"log"
 	"os"
 	"os/signal"
@@ -24,6 +25,7 @@ func NewEscapeMode(ctx context.Context, cancel context.CancelFunc) *EscapeMode {
 	}
 }
 func (this *EscapeMode) Run() {
+	fmt.Println("(--> press any key to menu <--)")
 	go this.Listen()
 	for {
 		select {

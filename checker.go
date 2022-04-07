@@ -11,11 +11,12 @@ import (
 	"time"
 )
 
-func NewArmoireChecker() *ArmoireChecker {
+func NewArmoireChecker(escapeMode *EscapeMode) *ArmoireChecker {
 	return &ArmoireChecker{
-		Requester:  NewRequester(NewConfig(APIClient)),
+		//Requester:  NewRequester(NewConfig(APIClient)),
 		DropsCount: 0,
 		DropsMap:   map[string][]Armoire{},
+		EscapeMode: escapeMode,
 	}
 }
 
@@ -35,7 +36,10 @@ func (this *ArmoireChecker) Run(ctx context.Context) {
 func (this *ArmoireChecker) manageChecker(ctx context.Context) {
 	// todo: use the context
 
+	fmt.Println("\n-------------------------------")
 	fmt.Println("Checking your Enchanted Armoire")
+	go this.EscapeMode.Run()
+
 	defer this.report()
 	// todo: what if the application is canceled(signaled)?
 	//       create ticker/timer to watch channels with termination signals
