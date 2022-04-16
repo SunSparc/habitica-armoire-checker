@@ -49,21 +49,17 @@ func (this *Config) getConfigValues() {
 	// if file does exist & user wants new configs -> get configs from user
 	// if file does exist & user wants old configs -> get configs from file
 	if configFileExists() && !this.resetRequested {
-		fmt.Printf("Welcome back!\n\nShall we use the credentials you entered\n  last time?\n\n")
+		fmt.Printf("Welcome back!\n\nShall we use the same credentials that\n  we used last time?\n\n")
 		fmt.Print("(Y or N): ")
-		reader := bufio.NewReader(os.Stdin)
-		keepOrNew, err := reader.ReadString('\n')
-		if err != nil {
-			log.Printf("[ERROR] reading configuration choice: %s; err: %s\n", keepOrNew, err)
-		}
-		if strings.ContainsRune(strings.ToLower(strings.TrimSpace(keepOrNew)), 'n') {
+		keepOrNew := readFromStdin()
+		if strings.ContainsRune(keepOrNew, 'n') {
 			//fmt.Println("[DEV] getting new config values:", keepOrNew) // DEV
 			this.readConfigFromUser()
 			return
 		}
 		//fmt.Println("[DEV] getting configuration from file:", keepOrNew) // DEV
 
-		err = this.readConfigFile()
+		err := this.readConfigFile()
 		if err == nil {
 			return
 		}
@@ -75,8 +71,10 @@ func (this *Config) getConfigValues() {
 func configFileExists() bool {
 	_, err := os.Stat(configFilename)
 	if err != nil {
+		log.Println("configFileExists, false:", err)
 		return false
 	}
+	log.Println("configFileExists, true:", err)
 	return true
 }
 
@@ -99,23 +97,23 @@ func (this *Config) readConfigFile() error {
 }
 
 func (this *Config) readConfigFromUser() {
-	var err error
 	fmt.Println(configText)
 	fmt.Print("Enter your Habitica User ID: ")
-	reader := bufio.NewReader(os.Stdin)
-	this.UserID, err = reader.ReadString('\n')
-	if err != nil {
-		log.Printf("[ERROR] reading user id: %s; err: %s\n", this.UserID, err)
-	}
-	this.UserID = strings.TrimSpace(this.UserID)
+	this.UserID = readFromStdin()
 	fmt.Print("Enter your Habitica API Token: ")
-	this.UserToken, err = reader.ReadString('\n')
-	if err != nil {
-		log.Printf("[ERROR] reading api token: %s; err: %s\n", this.UserToken, err)
-	}
-	this.UserToken = strings.TrimSpace(this.UserToken)
+	this.UserToken = readFromStdin()
 
 	fmt.Println()
+}
+
+func readFromStdin() string {
+	reader := bufio.NewReader(os.Stdin)
+	input, err := reader.ReadString('\n')
+	if err != nil {
+		log.Printf("[ERROR] reading user input: %s\n", err)
+	}
+	fmt.Println("this was the input:", input)
+	return strings.ToLower(strings.TrimSpace(input))
 }
 
 func writeConfigFile(config *Config) bool {
