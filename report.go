@@ -49,5 +49,5 @@ func showMeTheMoney(gold int64) string {
 	if gold <= 0 {
 		return "no"
 	}
-	return fmt.Sprintf("%.0f", gold)
+	return fmt.Sprintf("%.0d", gold)
 }

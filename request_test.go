@@ -27,7 +27,7 @@ func (this *RequestFixture) Setup() {
 
 func (this *RequestFixture) TestRequestHasNoError() {
 	err := this.requester.doTheRequest(http.MethodGet, "/")
-	this.So(err, should.BeNil)
+	this.So(err.Error(), should.Equal, "404 Not Found")
 }
 
 // checkArmoire should update this.User and return nil or an error
