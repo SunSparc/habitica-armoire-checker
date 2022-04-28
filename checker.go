@@ -21,6 +21,7 @@ func NewArmoireChecker(escapeMode *EscapeMode) *ArmoireChecker {
 }
 
 func (this *ArmoireChecker) Run(ctx context.Context) {
+	//go this.EscapeMode.Run()
 	reset := false
 	for {
 		this.Requester = NewRequester(NewConfig(APIClient, reset))
@@ -38,20 +39,20 @@ func (this *ArmoireChecker) manageChecker(ctx context.Context) {
 
 	fmt.Println("\n-------------------------------")
 	fmt.Println("Checking your Enchanted Armoire")
-	go this.EscapeMode.Run()
+	//go this.EscapeMode.Run()
 
 	defer this.report()
+
 	// todo: what if the application is canceled(signaled)?
 	//       create ticker/timer to watch channels with termination signals
 
-	for x := 0; x <= 5; x++ {
+	for {
 		if !this.check() {
-			//log.Println("[runner] done")
 			break
 		}
 		for t := 0; t < 30; t++ {
 			fmt.Print(".")
-			time.Sleep(time.Second * 2) // no faster than 1 request every 30 seconds
+			time.Sleep(time.Second * 1) // note: no faster than 1 request every 30 seconds
 		}
 	}
 }
@@ -85,9 +86,17 @@ func (this *ArmoireChecker) getSpendLimit() {
 	}
 	this.SpendingLimit, err = strconv.ParseInt(strings.TrimSpace(spendingLimit), 10, 64)
 	if err != nil {
-		// todo: what if the user is silly and inputs text or other nonsense other than numbers?
-		log.Printf("Sweet! We are just going to blow through\n  the whole pile of gold!\n\n")
+		log.Println("[ERROR] parsing spending limit:", err)
 	}
+	// todo: what if the user is silly and inputs text or other nonsense other than numbers?
+
+	if this.SpendingLimit > this.InitialGold {
+		log.Printf("Sweet! We are just going to blow through\n  the whole pile of gold!\n\n")
+		this.SpendingLimit = 0
+	} else {
+		this.SpendingLimit = this.InitialGold - this.SpendingLimit
+	}
+
 }
 
 func (this *ArmoireChecker) check() bool {
@@ -127,11 +136,11 @@ func (this *ArmoireChecker) goldReservesAreAdequate() bool {
 		return false
 	}
 	if (int64(this.User.Data.Stats.Gold) - 100) < this.SpendingLimit {
-		fmt.Println("Spending limit reached. Change the limit or go earn some more gold. =)")
+		fmt.Println("\nSpending limit reached. =)")
 		return false
 	}
 	if (this.User.Data.Stats.Gold - 100) < 0 {
-		fmt.Println("Insufficient funds.")
+		fmt.Println("\nInsufficient funds to continue.")
 		return false
 	}
 	return true
