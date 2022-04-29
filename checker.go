@@ -47,7 +47,7 @@ func (this *ArmoireChecker) manageChecker(ctx context.Context) {
 	//       create ticker/timer to watch channels with termination signals
 
 	for {
-		if !this.check() {
+		if !this.goldReservesAreAdequate() {
 			break
 		}
 		mandatoryApiWaitingPeriod()
@@ -104,16 +104,12 @@ func (this *ArmoireChecker) getSpendLimit() {
 
 }
 
-func (this *ArmoireChecker) check() bool {
-	if !this.goldReservesAreAdequate() {
-		return false
-	}
+func (this *ArmoireChecker) check() {
 	err := this.checkArmoire()
 	if err != nil {
-		return false
+		log.Println("[ERROR] checking armoire", err)
 	}
 	this.recordResponse()
-	return true
 }
 func (this *ArmoireChecker) recordResponse() {
 	if !this.User.Data.Flags.ArmoireOpened {

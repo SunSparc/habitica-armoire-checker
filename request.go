@@ -5,7 +5,6 @@ import (
 	"errors"
 	"fmt"
 	"io/ioutil"
-	"log"
 	"net/http"
 	"path"
 )
@@ -45,7 +44,7 @@ func (this *Requester) doTheRequest(method, action string) error {
 	client := http.Client{}
 	request, err := http.NewRequest(method, buildAddress(ApiVersion, action), nil)
 	if err != nil {
-		log.Println("[ERROR] http.NewRequest:", err)
+		//log.Println("[ERROR] http.NewRequest:", err)
 		return err
 	}
 
@@ -57,7 +56,7 @@ func (this *Requester) doTheRequest(method, action string) error {
 
 	response, err := client.Do(request)
 	if err != nil {
-		log.Println("[ERROR] client.Do:", err)
+		//log.Println("[ERROR] client.Do:", err)
 		return err
 	}
 	if !responseIsOk(response.StatusCode) {
@@ -65,13 +64,13 @@ func (this *Requester) doTheRequest(method, action string) error {
 	}
 	responseBytes, err := ioutil.ReadAll(response.Body)
 	if err != nil {
-		log.Println("[ERROR] ioutil.ReadAll:", err)
+		//log.Println("[ERROR] ioutil.ReadAll:", err)
 		return err
 	}
 
 	err = json.Unmarshal(responseBytes, &this.User)
 	if err != nil {
-		log.Println("[ERROR] json.Unmarshal:", err)
+		//log.Println("[ERROR] json.Unmarshal:", err)
 		return err
 	}
 	return nil
