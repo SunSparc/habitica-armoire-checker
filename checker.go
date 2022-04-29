@@ -71,9 +71,9 @@ func (this *ArmoireChecker) getInitialGold() bool {
 }
 func (this *ArmoireChecker) getSpendLimit() {
 	fmt.Printf("The Enchanted Armoire requires 100 gold\n  each time it is opened.\n")
-	fmt.Printf("\nYou currently have %d gold.\n", this.InitialGold)
+	fmt.Printf("\nYou currently have %d gold.\n\n", this.InitialGold)
 
-	fmt.Println("You can spend it all! Or set a limit.")
+	fmt.Println("Set your spending limit for this session.")
 	fmt.Println("  Examples:")
 	fmt.Println("  - 0 (no limit, Spend it all!!)")
 	fmt.Println("  - 1000 (only spend 1000 gold)")
