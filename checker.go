@@ -50,10 +50,15 @@ func (this *ArmoireChecker) manageChecker(ctx context.Context) {
 		if !this.check() {
 			break
 		}
-		for t := 0; t < 30; t++ {
-			fmt.Print(".")
-			time.Sleep(time.Second * 1) // note: no faster than 1 request every 30 seconds
-		}
+		mandatoryApiWaitingPeriod()
+		this.check()
+	}
+}
+
+func mandatoryApiWaitingPeriod() {
+	for t := 0; t < 30; t++ {
+		fmt.Print(".")
+		time.Sleep(time.Second * 1) // note: no faster than 1 request every 30 seconds
 	}
 }
 
