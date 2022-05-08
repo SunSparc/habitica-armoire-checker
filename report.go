@@ -12,8 +12,9 @@ import (
 
 func (this *ArmoireChecker) report() {
 	// todo: if we did no work, report that nothing was done, instead of saying "you started with no gold, etc..."
+	fmt.Println() // todo: clear screen instead
 	fmt.Println("==================================================")
-	fmt.Printf("\n                    REPORT\n")
+	fmt.Println("                     REPORT")
 	fmt.Println("==================================================")
 	fmt.Printf("You started with %s gold.\n", showMeTheMoney(this.InitialGold))
 	fmt.Printf("There were %d drops from your Enchanted Armoire.\n", this.DropsCount)
@@ -39,7 +40,7 @@ func (this *ArmoireChecker) report() {
 				fmt.Printf("- %s x %d\n", food, count)
 			}
 		case "gear":
-			fmt.Printf("gear drops: %#v\n", drops)
+			//fmt.Printf("gear drops: %#v\n", drops)
 			for _, drop := range drops {
 				fmt.Printf("- %s\n", drop.DropText)
 			}

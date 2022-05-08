@@ -65,7 +65,7 @@ func mandatoryApiWaitingPeriod() {
 func (this *ArmoireChecker) getInitialGold() bool {
 	err := this.getGoldAmount()
 	if err != nil {
-		log.Println("[ERROR] getGoldAmount:", err)
+		//log.Println("[ERROR] getGoldAmount:", err)
 		return false
 	}
 	this.InitialGold = int64(this.User.Data.Stats.Gold)
@@ -75,7 +75,7 @@ func (this *ArmoireChecker) getInitialGold() bool {
 	fmt.Println()
 	return true
 }
-func (this *ArmoireChecker) getSpendLimit() {
+func (this *ArmoireChecker) getSpendLimit() { // todo: move to config??
 	fmt.Printf("The Enchanted Armoire requires 100 gold\n  each time it is opened.\n")
 	fmt.Printf("\nYou currently have %d gold.\n\n", this.InitialGold)
 
@@ -93,6 +93,7 @@ func (this *ArmoireChecker) getSpendLimit() {
 	this.SpendingLimit, err = strconv.ParseInt(strings.TrimSpace(spendingLimit), 10, 64)
 	if err != nil {
 		log.Println("[ERROR] parsing spending limit:", err)
+		os.Exit(1)
 	}
 	// todo: what if the user is silly and inputs text or other nonsense other than numbers?
 
@@ -125,7 +126,7 @@ func (this *ArmoireChecker) recordResponse() {
 	}
 
 	//log.Printf("response.Data.Armoire: %v\n", response.Data.Armoire)
-	fmt.Print("*")
+	fmt.Print("*\n")
 
 	this.DropsMap[this.User.Data.Armoire.Type] = append(this.DropsMap[this.User.Data.Armoire.Type], this.User.Data.Armoire)
 	this.DropsCount = this.DropsCount + 1

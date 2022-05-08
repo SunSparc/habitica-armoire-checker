@@ -3,7 +3,7 @@ package main
 import (
 	"context"
 	"fmt"
-	"os/exec"
+	"time"
 )
 
 var APIClient string
@@ -17,6 +17,10 @@ func main() {
 	//NewEscapeMode(ctx, cancel).Run() // todo: run this while the checker is going
 
 	// todo: get the name of the user for personalization
+
+	time.Sleep(time.Second * 60) // todo: press any key to exit
+}
+
 func clearScreen() {
 	fmt.Print("\x1bc") // clear screen, works on macOS
 	//exec.Command("cmd", "/c", "cls").Run() // clear screen, works on macOS
