@@ -53,9 +53,12 @@ func (this *Config) getConfigValues() {
 	// if file does exist & user wants old configs -> get configs from file
 	if this.configFileExists() && !this.resetRequested {
 		fmt.Printf("Welcome back!\n\nShall we use the same credentials that\n  we used last time?\n\n")
-		fmt.Print("(Y or N): ")
+		fmt.Print("Yes, No, Cancel (y,n,c): ")
 		keepOrNew := readFromStdin()
-		if strings.ContainsRune(keepOrNew, 'n') {
+		if strings.ContainsRune(keepOrNew, 'c') || strings.Contains(keepOrNew, "cancel") {
+			os.Exit(1)
+		}
+		if strings.ContainsRune(keepOrNew, 'n') || strings.Contains(keepOrNew, "no") {
 			//fmt.Println("[DEV] getting new config values:", keepOrNew) // DEV
 			this.readConfigFromUser()
 			return
