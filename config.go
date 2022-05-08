@@ -7,6 +7,7 @@ import (
 	"io/ioutil"
 	"log"
 	"os"
+	"path"
 	"strings"
 )
 
@@ -19,6 +20,7 @@ type Config struct {
 	UserID         string `json:"user_id"`
 	UserToken      string `json:"user_token"`
 	apiClient      string // `json:"-"`
+	configPath     string
 	resetRequested bool
 }
 
@@ -37,9 +39,10 @@ func newConfig(apiClient string) *Config {
 
 func (this *Config) setup() {
 	this.ensureAPIClient()
+	this.ensureConfigPath()
 	this.getConfigValues()
 
-	if !writeConfigFile(this) {
+	if !writeConfigFile(this) { // todo: do not write the config file every time, only when we have new config data
 		fmt.Println("Unable to write the configuration file.")
 	}
 }
@@ -48,7 +51,7 @@ func (this *Config) getConfigValues() {
 	// if file does not exist -> get configs from user
 	// if file does exist & user wants new configs -> get configs from user
 	// if file does exist & user wants old configs -> get configs from file
-	if configFileExists() && !this.resetRequested {
+	if this.configFileExists() && !this.resetRequested {
 		fmt.Printf("Welcome back!\n\nShall we use the same credentials that\n  we used last time?\n\n")
 		fmt.Print("(Y or N): ")
 		keepOrNew := readFromStdin()
@@ -68,18 +71,18 @@ func (this *Config) getConfigValues() {
 	this.readConfigFromUser()
 }
 
-func configFileExists() bool {
-	_, err := os.Stat(configFilename)
+func (this *Config) configFileExists() bool {
+	_, err := os.Stat(this.configPath)
 	if err != nil {
-		log.Println("configFileExists, false:", err)
+		//log.Println("configFileExists, false:", err)
 		return false
 	}
-	log.Println("configFileExists, true:", err)
+	//log.Println("configFileExists, true:", err)
 	return true
 }
 
 func (this *Config) readConfigFile() error {
-	fileBytes, err := ioutil.ReadFile(configFilename)
+	fileBytes, err := ioutil.ReadFile(this.configPath)
 	if err != nil {
 		log.Println("[ERROR] reading config file:", err)
 		return err
@@ -113,7 +116,7 @@ func readFromStdin() string {
 	if err != nil {
 		log.Printf("[ERROR] reading user input: %s\n", err)
 	}
-	fmt.Println("this was the input:", input)
+	//fmt.Println("this was the input:", input)
 	return strings.ToLower(strings.TrimSpace(input))
 }
 
@@ -123,7 +126,7 @@ func writeConfigFile(config *Config) bool {
 		log.Println("[ERROR] writeConfigFile json.Marshal:", err)
 		return false
 	}
-	err = ioutil.WriteFile(configFilename, configBytes, 0644)
+	err = ioutil.WriteFile(config.configPath, configBytes, 0644)
 	if err != nil {
 		log.Println("[ERROR] writeConfigFile ioutil.WriteFile:", err)
 		return false
@@ -140,9 +143,23 @@ func (this *Config) ensureAPIClient() {
 	this.apiClient = apiClient
 }
 
+func (this *Config) ensureConfigPath() {
+	userConfigDir, err := os.UserConfigDir()
+	if err != nil {
+		log.Fatal("[ERROR] could not retrieve config directory:", err)
+	}
+	configDir := path.Join(userConfigDir, configDirectory)
+	err = os.MkdirAll(configDir, 0755)
+	if err != nil {
+		log.Fatal("[ERROR] could not make config directory:", err)
+	}
+	this.configPath = path.Join(configDir, configFilename)
+}
+
 const (
-	configFilename string = "config.json"
-	configText     string = `
+	configDirectory string = "HabiticaArmoireChecker"
+	configFilename  string = "config.json"
+	configText      string = `
 This application requires you to enter
 your Habitica User ID and API Token.
 
