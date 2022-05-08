@@ -69,6 +69,7 @@ func (this *ArmoireChecker) getInitialGold() bool {
 		return false
 	}
 	this.InitialGold = int64(this.User.Data.Stats.Gold)
+	clearScreen()
 	fmt.Println("\nSuccess! We are connected to Habitica.")
 	fmt.Println("----------------------------------------")
 	fmt.Println()

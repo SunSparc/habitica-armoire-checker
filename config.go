@@ -97,6 +97,7 @@ func (this *Config) readConfigFile() error {
 }
 
 func (this *Config) readConfigFromUser() {
+	// todo: clear the screen
 	fmt.Println(configText)
 	fmt.Print("Enter your Habitica User ID: ")
 	this.UserID = readFromStdin()

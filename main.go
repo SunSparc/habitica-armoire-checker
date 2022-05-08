@@ -9,9 +9,7 @@ import (
 var APIClient string
 
 func main() {
-	//fmt.Print("\x1bc") // clear screen, works on macOS
-	exec.Command("cmd", "/c", "cls").Run() // clear screen, works on macOS
-
+	clearScreen()
 	fmt.Println(welcomeText)
 	ctx, cancel := context.WithCancel(context.Background())
 	// todo: do config first, then start escape mode, then start checker ??
@@ -19,6 +17,9 @@ func main() {
 	//NewEscapeMode(ctx, cancel).Run() // todo: run this while the checker is going
 
 	// todo: get the name of the user for personalization
+func clearScreen() {
+	fmt.Print("\x1bc") // clear screen, works on macOS
+	//exec.Command("cmd", "/c", "cls").Run() // clear screen, works on macOS
 }
 
 const welcomeText = `
