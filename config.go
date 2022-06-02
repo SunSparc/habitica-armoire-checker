@@ -59,11 +59,11 @@ func (this *Config) getConfigValues() {
 			os.Exit(1)
 		}
 		if strings.ContainsRune(keepOrNew, 'n') || strings.Contains(keepOrNew, "no") {
-			//fmt.Println("[DEV] getting new config values:", keepOrNew) // DEV
+			fmt.Println("[DEV] getting new config values:", keepOrNew) // DEV
 			this.readConfigFromUser()
 			return
 		}
-		//fmt.Println("[DEV] getting configuration from file:", keepOrNew) // DEV
+		fmt.Println("[DEV] getting configuration from file:", keepOrNew) // DEV
 
 		err := this.readConfigFile()
 		if err == nil {
@@ -71,6 +71,7 @@ func (this *Config) getConfigValues() {
 		}
 		log.Println("[WARN] there was a problem reading from the configuration file:", err)
 	}
+	log.Println("no config file or reset requested")
 	this.readConfigFromUser()
 }
 
@@ -103,7 +104,7 @@ func (this *Config) readConfigFile() error {
 }
 
 func (this *Config) readConfigFromUser() {
-	// todo: clear the screen
+	clearScreen()
 	fmt.Println(configText)
 	fmt.Print("Enter your Habitica User ID: ")
 	this.UserID = readFromStdin()

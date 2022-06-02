@@ -21,62 +21,71 @@ func NewRequester(config *Config) *Requester {
 	return &Requester{
 		userID:    config.UserID,
 		userToken: config.UserToken,
-		apiClient: config.apiClient,
+		apiClient: config.apiClient, // aka User-Agent?
 	}
 }
 
 func (this *Requester) getGoldAmount() error {
-	err := this.doTheRequest(http.MethodGet, "user?userFields=stats.gp")
+	response, err := this.doTheRequest(http.MethodGet, buildAddress("user?userFields=stats.gp"))
 	if err != nil {
 		return err
 	}
+	log.Printf("[DEV] what do we do with the response? %#v\v", response)
 	return nil
 }
 func (this *Requester) checkArmoire() error {
 	//https://habitica.com/api/v3/user/buy-armoire
-	err := this.doTheRequest(http.MethodPost, "user/buy-armoire")
+	response, err := this.doTheRequest(http.MethodPost, buildAddress("user/buy-armoire"))
 	if err != nil {
 		return err
 	}
+	log.Printf("[DEV] what do we do with the response? %#v\v", response)
 	return nil
 }
 
-func (this *Requester) doTheRequest(method, action string) error {
-	client := http.Client{}
-	request, err := http.NewRequest(method, buildAddress(ApiVersion, action), nil)
+func (this *Requester) doTheRequest(method, action string) (*http.Response, error) {
+	log.Println("[DEV] action:", action)
+	request, err := http.NewRequest(method, action, nil)
 	if err != nil {
-		//log.Println("[ERROR] http.NewRequest:", err)
-		return err
+		log.Println("[ERROR] http.NewRequest:", err)
+		return nil, err
 	}
 
 	request.Header.Set("Content-Type", "application/json")
 	request.Header.Set("x-api-user", this.userID)
 	request.Header.Set("x-api-key", this.userToken)
 	request.Header.Set("x-client", this.apiClient)
-	//log.Println("[DEV] header values:", this.userID, this.userToken, this.apiClient)
+	log.Println("[DEV] header values:", this.userID, this.userToken, this.apiClient)
 
+	client := http.Client{}
 	response, err := client.Do(request)
 	if err != nil {
-		//log.Println("[ERROR] client.Do:", err)
-		return err
+		log.Printf("[ERROR] client.Do response: %#v\n", response)
+		log.Println("[ERROR] client.Do err:", err)
+		return response, err
 	}
+	return response, nil
+}
+func usedToBePartOfdoTheRequest() error { // todo: use this?
+	response := http.Response{}
 	responseBytes, err := ioutil.ReadAll(response.Body)
 	if err != nil {
 		log.Println("[WARN] could not read response from Habitica:", err)
 	}
 	if responseBytes != nil {
 		var errorResponse ErrorResponse
-		json.Unmarshal(responseBytes, &errorResponse)
-		//log.Printf("error response: %v\n", errorResponse)
+		json.Unmarshal(responseBytes, &errorResponse) // todo: we are unmarsharlling responseBytes twice
+		log.Printf("error response: %v\n", errorResponse)
 	}
 	if !responseIsOk(response.StatusCode) {
-		//log.Printf("response is not ok: %#v\n", err)
+		log.Printf("response is not ok: %#v\n", err)
 		return errors.New(response.Status)
 	}
 
-	err = json.Unmarshal(responseBytes, &this.User)
+	err = json.Unmarshal(responseBytes, User{}) // was &this.User // todo: we are unmarsharlling responseBytes twice
 	if err != nil {
-		//log.Println("[ERROR] json.Unmarshal:", err)
+		log.Println("[ERROR] json.Unmarshal:", err)
+		log.Println("[ERROR] json.Unmarshal response bytes:", string(responseBytes))
 		return err
 	}
 	return nil
@@ -100,8 +109,8 @@ func responseIsOk(code int) bool {
 	return false
 }
 
-func buildAddress(version, action string) string {
-	return LiveHost + path.Join(ApiPath, version, action)
+func buildAddress(action string) string {
+	return LiveHost + path.Join(ApiPath, ApiVersion, action)
 }
 
 const ApiPath string = "api"
