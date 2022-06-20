@@ -30,8 +30,7 @@ func (this *Requester) getGoldAmount() error {
 	if err != nil {
 		return err
 	}
-	log.Printf("[DEV] what do we do with the response? %#v\v", response)
-	return nil
+	return checkResponse(response)
 }
 func (this *Requester) checkArmoire() error {
 	//https://habitica.com/api/v3/user/buy-armoire
@@ -39,12 +38,11 @@ func (this *Requester) checkArmoire() error {
 	if err != nil {
 		return err
 	}
-	log.Printf("[DEV] what do we do with the response? %#v\v", response)
-	return nil
+	return checkResponse(response)
 }
 
 func (this *Requester) doTheRequest(method, action string) (*http.Response, error) {
-	log.Println("[DEV] action:", action)
+	//log.Println("[DEV] action:", action)
 	request, err := http.NewRequest(method, action, nil)
 	if err != nil {
 		log.Println("[ERROR] http.NewRequest:", err)
@@ -66,27 +64,22 @@ func (this *Requester) doTheRequest(method, action string) (*http.Response, erro
 	}
 	return response, nil
 }
-func usedToBePartOfdoTheRequest() error { // todo: use this?
-	response := http.Response{}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+func checkResponse(response *http.Response) error {
 	responseBytes, err := ioutil.ReadAll(response.Body)
 	if err != nil {
 		log.Println("[WARN] could not read response from Habitica:", err)
 	}
 	if responseBytes != nil {
 		var errorResponse ErrorResponse
-		json.Unmarshal(responseBytes, &errorResponse) // todo: we are unmarsharlling responseBytes twice
-		log.Printf("error response: %v\n", errorResponse)
+		json.Unmarshal(responseBytes, &errorResponse)
+		log.Printf("[INFO] response: %v\n", errorResponse)
 	}
 	if !responseIsOk(response.StatusCode) {
-		log.Printf("response is not ok: %#v\n", err)
+		log.Printf("[ERROR] response is not ok: %#v\n", err)
 		return errors.New(response.Status)
-	}
-
-	err = json.Unmarshal(responseBytes, User{}) // was &this.User // todo: we are unmarsharlling responseBytes twice
-	if err != nil {
-		log.Println("[ERROR] json.Unmarshal:", err)
-		log.Println("[ERROR] json.Unmarshal response bytes:", string(responseBytes))
-		return err
 	}
 	return nil
 }
@@ -109,6 +102,8 @@ func responseIsOk(code int) bool {
 	return false
 }
 
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 func buildAddress(action string) string {
 	return LiveHost + path.Join(ApiPath, ApiVersion, action)
 }
@@ -123,6 +118,5 @@ const (
 Habitica reports that the credentials
   you provided are not authorized to
   access your account.
-* * * * * * * * * * * * * * * * * * * *
-`
+* * * * * * * * * * * * * * * * * * * *`
 )

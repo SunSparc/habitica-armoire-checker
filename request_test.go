@@ -18,16 +18,17 @@ func TestRequestFixture(t *testing.T) {
 type RequestFixture struct {
 	*gunit.Fixture
 
-	server    *httptest.Server
-	requester *Requester
+	//server    *httptest.Server
+	//requester *Requester
 }
 
 func (this *RequestFixture) Setup() {
-	this.server = fakeServer()
-	this.requester = NewRequester(&Config{})
 }
 
 func (this *RequestFixture) TestRequestHeadersAreSet() {
+	server := fakeServer()
+	requester := NewRequester(&Config{})
+
 	//curl 'https://habitica.com/api/v3/user?userFields=stats.gp' -v \
 	//-H "Content-Type:application/json" \
 	//-H "x-api-user: $HABITICA_API_USER" \
@@ -38,11 +39,11 @@ func (this *RequestFixture) TestRequestHeadersAreSet() {
 	//- 200
 	//- {"success":true,"data":{<..etc...>}}
 
-	this.requester.userID = "test-user-id"
-	this.requester.userToken = "test-user-token"
-	this.requester.apiClient = "test-client-id"
+	requester.userID = "test-user-id"
+	requester.userToken = "test-user-token"
+	requester.apiClient = "test-client-id"
 
-	response, err := this.requester.doTheRequest(http.MethodGet, this.server.URL+"/good/path")
+	response, err := requester.doTheRequest(http.MethodGet, server.URL+"/good/path")
 
 	this.So(err, should.BeNil)
 	this.So(response.Request.Header.Get("X-Api-User"), should.Equal, "test-user-id")
@@ -53,6 +54,9 @@ func (this *RequestFixture) TestRequestHeadersAreSet() {
 }
 
 func (this *RequestFixture) TestRequestWithoutHeadersResultsIn401() {
+	server := fakeServer()
+	requester := NewRequester(&Config{})
+
 	//unset HABITICA_API_USER
 	//unset HABITICA_API_KEY
 	//unset HABITICA_API_CLIENT
@@ -60,10 +64,29 @@ func (this *RequestFixture) TestRequestWithoutHeadersResultsIn401() {
 	//request without headers:
 	//- 401
 	//- {"success":false,"error":"NotAuthorized","message":"Missing authentication headers."}
-	//todo
+
+	requester.userID = ""
+	requester.userToken = ""
+	requester.apiClient = ""
+
+	response, err := requester.doTheRequest(http.MethodGet, server.URL+"/missing/headers")
+
+	this.So(err, should.BeNil)
+	this.So(response.Request.Header.Get("X-Api-User"), should.Equal, "")
+	this.So(response.Request.Header.Get("X-Api-Key"), should.Equal, "")
+	this.So(response.Request.Header.Get("X-Client"), should.Equal, "")
+	this.So(response.Request.Header.Get("Content-Type"), should.Equal, "application/json")
+	this.So(response.StatusCode, should.Equal, http.StatusUnauthorized)
 }
 
 func (this *RequestFixture) TestRequestWithBadHeadersResultsIn401() {
+	server := fakeServer()
+	requester := NewRequester(&Config{})
+
+	requester.userID = "bad user id"
+	requester.userToken = "bad user token"
+	requester.apiClient = "bad api client"
+
 	//export HABITICA_API_USER=asdf
 	//export HABITICA_API_KEY=asdf
 	//export HABITICA_API_CLIENT=asdf
@@ -71,12 +94,24 @@ func (this *RequestFixture) TestRequestWithBadHeadersResultsIn401() {
 	//request with incorrect headers:
 	//- 401
 	//- {"success":false,"error":"NotAuthorized","message":"There is no account that uses those credentials."}
-	//todo
+	// path = /bad/headers
+
+	response, err := requester.doTheRequest(http.MethodGet, server.URL+"/bad/headers")
+
+	this.So(err, should.BeNil)
+	this.So(response.Request.Header.Get("X-Api-User"), should.Equal, "bad user id")
+	this.So(response.Request.Header.Get("X-Api-Key"), should.Equal, "bad user token")
+	this.So(response.Request.Header.Get("X-Client"), should.Equal, "bad api client")
+	this.So(response.Request.Header.Get("Content-Type"), should.Equal, "application/json")
+	this.So(response.StatusCode, should.Equal, http.StatusUnauthorized)
 }
 
 func (this *RequestFixture) TestRequestHasNoError() {
-	log.Println("this.server.URL:", this.server.URL, this.server)
-	response, err := this.requester.doTheRequest(http.MethodGet, this.server.URL+"/some/path")
+	server := fakeServer()
+	requester := NewRequester(&Config{})
+
+	log.Println("this.server.URL:", server.URL, server)
+	response, err := requester.doTheRequest(http.MethodGet, server.URL+"/good/path")
 
 	responseBody, err := ioutil.ReadAll(response.Body)
 	if err != nil {
@@ -89,8 +124,11 @@ func (this *RequestFixture) TestRequestHasNoError() {
 }
 
 func (this *RequestFixture) SkipTestGetGoldAmountDoesSomethingGood() {
-	log.Println("this.server.URL:", this.server.URL, this.server)
-	err := this.requester.getGoldAmount()
+	server := fakeServer()
+	requester := NewRequester(&Config{})
+
+	log.Println("this.server.URL:", server.URL, server)
+	err := requester.getGoldAmount()
 	this.So(err.Error(), should.Equal, "404 Not Found")
 }
 
@@ -106,8 +144,34 @@ func fakeApi(writer http.ResponseWriter, request *http.Request) {
 	log.Println("[fakeApi] request.Header.Get(x-api-key):", request.Header.Get("X-Api-User"))
 	log.Printf("[fakeApi] request.Header: %#v\n", request.Header)
 	log.Printf("[fakeApi] request.RequestURI: %#v\n", request.RequestURI)
-	_, err := writer.Write([]byte(request.RequestURI + "fake api response"))
-	if err != nil {
-		log.Println("[fakeApi] write error:", err)
+
+	switch request.URL.Path {
+	case "/good/path":
+		goodPath(writer, request)
+	case "/missing/headers":
+		missingHeaders(writer, request)
+	case "/bad/headers":
+		badHeaders(writer, request)
+	}
+}
+
+func goodPath(writer http.ResponseWriter, request *http.Request) {
+	writer.WriteHeader(http.StatusOK)
+}
+func missingHeaders(writer http.ResponseWriter, request *http.Request) {
+	if request.Header.Get("X-Api-User") == "" ||
+		request.Header.Get("X-Api-Key") == "" ||
+		request.Header.Get("X-Client") == "" {
+
+		writer.WriteHeader(http.StatusUnauthorized)
+	}
+}
+
+func badHeaders(writer http.ResponseWriter, request *http.Request) {
+	if request.Header.Get("X-Api-User") == "bad user id" ||
+		request.Header.Get("X-Api-Key") == "bad user token" ||
+		request.Header.Get("X-Client") == "bad api client" {
+
+		writer.WriteHeader(http.StatusUnauthorized)
 	}
 }
