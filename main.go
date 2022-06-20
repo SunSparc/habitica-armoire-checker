@@ -3,7 +3,6 @@ package main
 import (
 	"context"
 	"fmt"
-	"time"
 )
 
 var APIClient string
@@ -18,7 +17,8 @@ func main() {
 
 	// todo: get the name of the user for personalization
 
-	time.Sleep(time.Second * 60) // todo: press any key to exit
+	fmt.Println("Press Enter/Return when finished.")
+	readFromStdin()
 }
 
 func clearScreen() {
@@ -28,7 +28,6 @@ func clearScreen() {
 
 const welcomeText = `
 Habitica Armoire Checker
-=========================
-`
+=========================`
 
 ////////////////////////////////////

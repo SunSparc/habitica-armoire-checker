@@ -1,6 +1,6 @@
 #!/usr/bin/make -f
 
-compile: test
+build: test
 	CGO_ENABLED="0" GOOS=darwin  GOARCH=amd64 go build -trimpath -ldflags "-X 'main.APIClient=${HABITICA_API_CLIENT}'" -o "bin/macos_amd64/habitica-armoire-checker"
 	CGO_ENABLED="0" GOOS=darwin  GOARCH=arm64 go build -trimpath -ldflags "-X 'main.APIClient=${HABITICA_API_CLIENT}'" -o "bin/macos_arm/habitica-armoire-checker"
 
@@ -13,7 +13,7 @@ compile: test
 test:
 	go test ./...
 
-run: compile
+run: build
 	./bin/macos_amd64/habitica-armoire-checker
 
-.PHONY: compile test run
+.PHONY: build test run

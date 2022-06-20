@@ -12,7 +12,7 @@ import (
 
 func (this *ArmoireChecker) report() {
 	// todo: if we did no work, report that nothing was done, instead of saying "you started with no gold, etc..."
-	fmt.Println() // todo: clear screen instead
+	clearScreen()
 	fmt.Println("==================================================")
 	fmt.Println("                     REPORT")
 	fmt.Println("==================================================")

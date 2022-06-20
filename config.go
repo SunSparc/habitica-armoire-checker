@@ -173,6 +173,5 @@ You can find both of those here:
 These credentials will be stored on
   your computer so that you do not need
   to enter them each time you run this
-  application.
-`
+  application.`
 )
