@@ -129,7 +129,15 @@ func (this *RequestFixture) SkipTestGetGoldAmountDoesSomethingGood() {
 
 	log.Println("this.server.URL:", server.URL, server)
 	err := requester.getGoldAmount()
-	this.So(err.Error(), should.Equal, "404 Not Found")
+	this.So(err, should.BeNil)
+	this.So(requester.User.Data.Stats.Gold, should.BeGreaterThan, 0)
+}
+
+// todo: TestCheckArmoire() lowers gold amount and increases loot
+
+func (this *RequestFixture) TestBuildAddress() {
+	address := buildAddress("test-action")
+	this.So(address, should.Equal, "https://habitica.com/api/v3/test-action")
 }
 
 // todo: test not connected to network ?
