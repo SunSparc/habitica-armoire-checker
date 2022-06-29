@@ -17,16 +17,18 @@ import (
 // os.Getenv("HABITICA_API_CLIENT")
 
 type Config struct {
-	UserID         string `json:"user_id"`
-	UserToken      string `json:"user_token"`
-	apiClient      string // `json:"-"`
-	configPath     string
-	resetRequested bool
+	UserID             string `json:"user_id"`
+	UserToken          string `json:"user_token"`
+	apiClient          string // `json:"-"`
+	configPath         string
+	resetRequested     bool
+	configReadFromUser bool
 }
 
 func NewConfig(apiClient string, reset bool) *Config {
 	config := newConfig(apiClient)
 	config.resetRequested = reset
+	config.configReadFromUser = false
 	config.setup()
 	return config
 }
@@ -71,7 +73,7 @@ func (this *Config) getConfigValues() {
 		}
 		log.Println("[WARN] there was a problem reading from the configuration file:", err)
 	}
-	log.Println("no config file or reset requested")
+	this.resetRequested = false
 	this.readConfigFromUser()
 }
 
@@ -105,6 +107,12 @@ func (this *Config) readConfigFile() error {
 
 func (this *Config) readConfigFromUser() {
 	clearScreen()
+	if this.configReadFromUser {
+		fmt.Println("Would you like to enter your credentials\nagain? (y/n)")
+		if readFromStdin() == "n" {
+			return
+		}
+	}
 	fmt.Println(configText)
 	fmt.Print("Enter your Habitica User ID: ")
 	this.UserID = readFromStdin()
@@ -112,6 +120,7 @@ func (this *Config) readConfigFromUser() {
 	this.UserToken = readFromStdin()
 
 	fmt.Println()
+	this.configReadFromUser = true
 }
 
 func readFromStdin() string {
