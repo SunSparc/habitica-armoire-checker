@@ -59,11 +59,11 @@ func (this *Config) getConfigValues() {
 			os.Exit(1)
 		}
 		if strings.ContainsRune(keepOrNew, 'n') || strings.Contains(keepOrNew, "no") {
-			fmt.Println("[DEV] getting new config values:", keepOrNew) // DEV
+			//fmt.Println("[DEV] getting new config values:", keepOrNew) // DEV
 			this.readConfigFromUser()
 			return
 		}
-		fmt.Println("[DEV] getting configuration from file:", keepOrNew) // DEV
+		//fmt.Println("[DEV] getting configuration from file:", keepOrNew) // DEV
 
 		err := this.readConfigFile()
 		if err == nil {
@@ -90,6 +90,7 @@ func (this *Config) readConfigFile() error {
 	if err != nil {
 		log.Println("[ERROR] reading config file:", err)
 		return err
+		// TODO: os.exit(1) ??? continuing does not make sense, we should just terminate
 	}
 	var config Config
 	err = json.Unmarshal(fileBytes, &config)
@@ -109,7 +110,7 @@ func (this *Config) readConfigFromUser() {
 	if readFromStdin() == "n" {
 		return
 	}
-	fmt.Println(configText)
+	fmt.Printf("%s\n\n", configText)
 	fmt.Print("Enter your Habitica User ID: ")
 	this.UserID = readFromStdin()
 	fmt.Print("Enter your Habitica API Token: ")

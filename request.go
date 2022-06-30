@@ -82,7 +82,7 @@ func (this *Requester) processResponse(response *http.Response) error {
 			this.User.Data = habiticaResponse.Data
 			return nil
 		}
-		fmt.Printf("Habitica says:\n%q\n", habiticaResponse.Message)
+		fmt.Printf("\n\nHabitica says:\n%q\n", habiticaResponse.Message)
 		fmt.Printf("\n\n(Press Enter/Return to continue.)\n")
 		readFromStdin()
 		return errors.New(response.Status)

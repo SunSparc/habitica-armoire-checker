@@ -22,6 +22,7 @@ func main() {
 }
 
 func clearScreen() {
+	//return             // DEV MODE
 	fmt.Print("\x1bc") // clear screen, works on macOS
 	//exec.Command("cmd", "/c", "cls").Run() // clear screen, works on macOS
 }
