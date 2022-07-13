@@ -106,11 +106,12 @@ func (this *Config) readConfigFile() error {
 
 func (this *Config) readConfigFromUser() {
 	clearScreen()
-	fmt.Println("Would you like to enter your credentials\nagain? (y/n)")
-	if readFromStdin() == "n" {
-		return
-	}
 	fmt.Printf("%s\n\n", configText)
+	fmt.Println("Would you like to enter your credentials? (y/n)")
+	if readFromStdin() == "n" {
+		os.Exit(1)
+	}
+
 	fmt.Print("Enter your Habitica User ID: ")
 	this.UserID = readFromStdin()
 	fmt.Print("Enter your Habitica API Token: ")
