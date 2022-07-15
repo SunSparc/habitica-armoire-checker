@@ -30,3 +30,16 @@ Habitica Armoire Checker
 - Click "Open".
 - This security process should only happen the first time you download and try to run the Habitica Armoire Checker application.
 - If you download another version, you will need to go through the same process again.
+
+---
+
+*Windows*
+- When you double-click the file you will probably see a warning indicating that Windows prevented an unrecognized app from starting.
+
+[![alt=file](./assets/images/windows_amd64_protected_1-small.png)](./assets/images/windows_amd64_protected_1-large.png)
+
+- Click the "More info" text and then you should see the option to "Run anyway". Click that.
+
+[![alt=file](./assets/images/windows_amd64_protected_2-small.png)](./assets/images/windows_amd64_protected_2-large.png)
+
+w
